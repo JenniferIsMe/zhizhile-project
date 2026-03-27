@@ -1,62 +1,58 @@
 package com.zzl.zhizhile.pattern.mapper;
 
 import com.zzl.zhizhile.pattern.model.entity.ProjectPatternEntity;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.stereotype.Component;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
 
 /**
- * 图解 DAO，提供项目图解的内存化增删查能力。
+ * 图解 DAO，提供项目图解持久化增删查能力。
  */
-@Component
-public class ProjectPatternMapper {
-    private final AtomicLong idGen = new AtomicLong(1);
-    private final Map<Long, ProjectPatternEntity> byId = new ConcurrentHashMap<>();
+@Mapper
+public interface ProjectPatternMapper {
 
     /**
      * 新增图解记录。
      */
-    public ProjectPatternEntity insert(ProjectPatternEntity entity) {
-        long id = idGen.getAndIncrement();
-        entity.setId(id);
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreateTime(now);
-        entity.setUpdateTime(now);
-        byId.put(id, entity);
-        return entity;
-    }
+    @Insert("""
+            INSERT INTO project_patterns (project_id, source_type, display_name, file_id, external_url, create_time, update_time)
+            VALUES (#{projectId}, #{sourceType}, #{displayName}, #{fileId}, #{externalUrl}, NOW(), NOW())
+            """)
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    int insert(ProjectPatternEntity entity);
 
     /**
      * 按图解 ID 查询图解。
      */
-    public Optional<ProjectPatternEntity> findById(Long id) {
-        return Optional.ofNullable(byId.get(id));
+    @Select("""
+            SELECT id, project_id, source_type, display_name, file_id, external_url, create_time, update_time
+            FROM project_patterns
+            WHERE id = #{id}
+            """)
+    ProjectPatternEntity selectById(Long id);
+
+    default Optional<ProjectPatternEntity> findById(Long id) {
+        return Optional.ofNullable(selectById(id));
     }
 
     /**
      * 查询项目下全部图解，按创建时间升序返回。
      */
-    public List<ProjectPatternEntity> findByProjectId(Long projectId) {
-        List<ProjectPatternEntity> list = new ArrayList<>();
-        for (ProjectPatternEntity entity : byId.values()) {
-            if (projectId.equals(entity.getProjectId())) {
-                list.add(entity);
-            }
-        }
-        list.sort(Comparator.comparing(ProjectPatternEntity::getCreateTime));
-        return list;
-    }
+    @Select("""
+            SELECT id, project_id, source_type, display_name, file_id, external_url, create_time, update_time
+            FROM project_patterns
+            WHERE project_id = #{projectId}
+            ORDER BY create_time ASC, id ASC
+            """)
+    List<ProjectPatternEntity> findByProjectId(Long projectId);
 
     /**
      * 按图解 ID 删除图解。
      */
-    public void deleteById(Long id) {
-        byId.remove(id);
-    }
+    @Delete("DELETE FROM project_patterns WHERE id = #{id}")
+    int deleteById(Long id);
 }

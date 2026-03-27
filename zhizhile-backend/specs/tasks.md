@@ -841,3 +841,70 @@
 - `plan.md` 中定义的核心模块全部具备最小可运行实现
 - 项目、图解、阅读配置、进度同步和总览恢复主链路全部可测试
 - 每个功能均遵守测试先行和单任务单文件修改约束
+
+## 8. MySQL 迁移补充任务（2026-03-27）
+
+为将内存 Mapper 切换为可持久化实现，新增以下补充任务：
+
+### T060
+
+文件：[pom.xml](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/pom.xml)
+
+任务：
+
+- 引入 MyBatis、MySQL 驱动与测试用 H2 依赖
+
+### T061
+
+文件：[application.yml](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/resources/application.yml)
+
+任务：
+
+- 增加 MySQL 数据源与 MyBatis 配置项
+
+### T062
+
+文件：[ZhizhileBackendApplication.java](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/java/com/zzl/zhizhile/ZhizhileBackendApplication.java)
+
+任务：
+
+- 配置 MyBatis `@MapperScan`
+
+### T063-T067
+
+文件：
+
+- [ProjectMapper.java](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/java/com/zzl/zhizhile/project/mapper/ProjectMapper.java)
+- [ProjectPatternMapper.java](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/java/com/zzl/zhizhile/pattern/mapper/ProjectPatternMapper.java)
+- [FileResourceMapper.java](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/java/com/zzl/zhizhile/file/mapper/FileResourceMapper.java)
+- [PatternConfigMapper.java](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/java/com/zzl/zhizhile/configstate/mapper/PatternConfigMapper.java)
+- [ProjectProgressMapper.java](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/java/com/zzl/zhizhile/progress/mapper/ProjectProgressMapper.java)
+
+任务：
+
+- 将内存 DAO 改为 MyBatis Mapper 接口
+- 补齐对应 SQL（增删改查、覆盖写）
+
+### T068
+
+文件：[schema.sql](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/resources/db/schema.sql)
+
+任务：
+
+- 新增 MySQL 建表脚本（5 张核心业务表）
+
+### T069
+
+文件：[src/test/resources/application.yml](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/test/resources/application.yml)
+
+任务：
+
+- 配置 H2（MySQL 模式）测试数据源与初始化脚本
+
+### T070
+
+文件：[PatternConfigService.java](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/java/com/zzl/zhizhile/configstate/service/PatternConfigService.java)
+
+任务：
+
+- 兼容数据库非空字段约束，补充默认值写入

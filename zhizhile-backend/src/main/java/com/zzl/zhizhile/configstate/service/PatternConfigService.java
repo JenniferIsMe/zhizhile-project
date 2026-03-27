@@ -23,10 +23,11 @@ public class PatternConfigService {
         PatternConfigEntity entity = new PatternConfigEntity();
         entity.setProjectId(projectId);
         entity.setPatternId(patternId);
-        entity.setCurrentPage(request.getCurrentPage());
-        entity.setMaskTopOffset(request.getMaskTopOffset());
-        entity.setMaskHeight(request.getMaskHeight());
-        return patternConfigMapper.upsert(entity);
+        entity.setCurrentPage(request.getCurrentPage() == null ? 1 : request.getCurrentPage());
+        entity.setMaskTopOffset(request.getMaskTopOffset() == null ? 0 : request.getMaskTopOffset());
+        entity.setMaskHeight(request.getMaskHeight() == null ? 0 : request.getMaskHeight());
+        patternConfigMapper.upsert(entity);
+        return entity;
     }
 
     /**

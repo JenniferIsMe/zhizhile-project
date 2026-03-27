@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:zzl;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+zhizhile:
+  upload:
+    dir: ${java.io.tmpdir}/zhizhile/test-uploads
+    allowed-exts: pdf,jpg,jpeg,png
+  user:
+    test-user-id: 10001

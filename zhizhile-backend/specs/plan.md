@@ -259,6 +259,44 @@ zhizhile-backend/
 
 ## 6.3 添加图解链接流程
 
+## 12. MySQL + MyBatis 落地补充（2026-03-27）
+
+### 12.1 技术选型
+
+- 数据库：MySQL 8.x
+- ORM/持久层：MyBatis（注解 SQL 方式）
+- 连接池：HikariCP（Spring Boot 默认）
+
+### 12.2 持久层实现约定
+
+- 各模块 `mapper` 统一改为 MyBatis `@Mapper` 接口。
+- 所有主键采用数据库自增并回填到实体对象。
+- `PatternConfig`、`ProjectProgress` 采用 `INSERT ... ON DUPLICATE KEY UPDATE` 实现覆盖保存。
+
+### 12.3 数据库表
+
+本次新增建表脚本：
+
+- `projects`
+- `project_patterns`
+- `file_resources`
+- `pattern_configs`
+- `project_progress`
+
+脚本路径：
+
+- [`src/main/resources/db/schema.sql`](/Users/ouyangxiaofeng/dev/zzl-project/zhizhile-backend/src/main/resources/db/schema.sql)
+
+### 12.4 配置约定
+
+- 生产配置：`application.yml` 使用 MySQL 数据源占位配置。
+- 测试配置：`src/test/resources/application.yml` 使用 H2（MySQL 模式）并自动执行 `schema.sql`。
+
+### 12.5 兼容性说明
+
+- 服务层与控制层对外行为保持不变。
+- 仅替换 DAO 实现与运行时依赖，不改变接口入参/出参协议。
+
 1. 用户在指定项目下输入图解链接
 2. 后端校验链接格式
 3. 建立项目与图解关系

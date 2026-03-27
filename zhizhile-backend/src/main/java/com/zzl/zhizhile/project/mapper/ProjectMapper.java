@@ -1,46 +1,54 @@
 package com.zzl.zhizhile.project.mapper;
 
 import com.zzl.zhizhile.project.model.entity.ProjectEntity;
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.stereotype.Component;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
- * 项目 DAO，提供项目数据的内存化读写能力。
+ * 项目 DAO，提供项目数据的持久化读写能力。
  */
-@Component
-public class ProjectMapper {
-    private final AtomicLong idGen = new AtomicLong(1);
-    private final Map<Long, ProjectEntity> store = new ConcurrentHashMap<>();
+@Mapper
+public interface ProjectMapper {
 
     /**
      * 新增项目记录。
      */
-    public ProjectEntity insert(ProjectEntity entity) {
-        long id = idGen.getAndIncrement();
-        entity.setId(id);
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreateTime(now);
-        entity.setUpdateTime(now);
-        store.put(id, entity);
-        return entity;
-    }
+    @Insert("""
+            INSERT INTO projects (user_id, name, status, current_pattern_id, create_time, update_time)
+            VALUES (#{userId}, #{name}, #{status}, #{currentPatternId}, NOW(), NOW())
+            """)
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    int insert(ProjectEntity entity);
 
     /**
      * 按项目 ID 查询项目。
      */
-    public Optional<ProjectEntity> findById(Long id) {
-        return Optional.ofNullable(store.get(id));
+    @Select("""
+            SELECT id, user_id, name, status, current_pattern_id, create_time, update_time
+            FROM projects
+            WHERE id = #{id}
+            """)
+    ProjectEntity selectById(Long id);
+
+    default Optional<ProjectEntity> findById(Long id) {
+        return Optional.ofNullable(selectById(id));
     }
 
     /**
      * 更新项目记录。
      */
-    public void update(ProjectEntity entity) {
-        entity.setUpdateTime(LocalDateTime.now());
-        store.put(entity.getId(), entity);
-    }
+    @Update("""
+            UPDATE projects
+            SET user_id = #{userId},
+                name = #{name},
+                status = #{status},
+                current_pattern_id = #{currentPatternId},
+                update_time = NOW()
+            WHERE id = #{id}
+            """)
+    int update(ProjectEntity entity);
 }

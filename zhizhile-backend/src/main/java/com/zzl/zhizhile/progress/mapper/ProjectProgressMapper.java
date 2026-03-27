@@ -1,40 +1,45 @@
 package com.zzl.zhizhile.progress.mapper;
 
 import com.zzl.zhizhile.progress.model.entity.ProjectProgressEntity;
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.stereotype.Component;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 项目进度 DAO，按项目维度保存计数和计时结果。
  */
-@Component
-public class ProjectProgressMapper {
-    private final AtomicLong idGen = new AtomicLong(1);
-    private final Map<Long, ProjectProgressEntity> store = new ConcurrentHashMap<>();
+@Mapper
+public interface ProjectProgressMapper {
 
     /**
      * 保存或覆盖项目进度。
      */
-    public ProjectProgressEntity upsert(ProjectProgressEntity entity) {
-        ProjectProgressEntity existing = store.get(entity.getProjectId());
-        if (existing == null) {
-            entity.setId(idGen.getAndIncrement());
-        } else {
-            entity.setId(existing.getId());
-        }
-        entity.setUpdateTime(LocalDateTime.now());
-        store.put(entity.getProjectId(), entity);
-        return entity;
-    }
+    @Insert("""
+            INSERT INTO project_progress (project_id, current_row_index, total_count, total_seconds, update_time)
+            VALUES (#{projectId}, #{currentRowIndex}, #{totalCount}, #{totalSeconds}, NOW())
+            ON DUPLICATE KEY UPDATE
+              id = LAST_INSERT_ID(id),
+              current_row_index = VALUES(current_row_index),
+              total_count = VALUES(total_count),
+              total_seconds = VALUES(total_seconds),
+              update_time = NOW()
+            """)
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    int upsert(ProjectProgressEntity entity);
 
     /**
      * 按项目 ID 查询项目进度。
      */
-    public Optional<ProjectProgressEntity> findByProjectId(Long projectId) {
-        return Optional.ofNullable(store.get(projectId));
+    @Select("""
+            SELECT id, project_id, current_row_index, total_count, total_seconds, update_time
+            FROM project_progress
+            WHERE project_id = #{projectId}
+            """)
+    ProjectProgressEntity selectByProjectId(Long projectId);
+
+    default Optional<ProjectProgressEntity> findByProjectId(Long projectId) {
+        return Optional.ofNullable(selectByProjectId(projectId));
     }
 }

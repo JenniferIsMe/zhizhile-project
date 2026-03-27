@@ -28,7 +28,8 @@ public class ProjectProgressService {
         if (entity.getTotalSeconds() == null) {
             entity.setTotalSeconds(0L);
         }
-        return progressMapper.upsert(entity);
+        progressMapper.upsert(entity);
+        return entity;
     }
 
     /**
@@ -44,7 +45,8 @@ public class ProjectProgressService {
             entity.setTotalCount(0);
         }
         entity.setTotalSeconds(request.getTotalSeconds());
-        return progressMapper.upsert(entity);
+        progressMapper.upsert(entity);
+        return entity;
     }
 
     /**

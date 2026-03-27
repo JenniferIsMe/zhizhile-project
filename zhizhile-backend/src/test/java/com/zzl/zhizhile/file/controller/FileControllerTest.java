@@ -30,7 +30,10 @@ class FileControllerTest {
 
         FileResourceEntity file = new FileResourceEntity();
         file.setOriginalName("x.pdf");
+        file.setStoredName("x-stored.pdf");
+        file.setFileExt("pdf");
         file.setContentType("application/pdf");
+        file.setStorageType("LOCAL");
         file.setRelativePath(p.toString());
         file.setFileSize(Files.size(p));
         fileResourceMapper.insert(file);

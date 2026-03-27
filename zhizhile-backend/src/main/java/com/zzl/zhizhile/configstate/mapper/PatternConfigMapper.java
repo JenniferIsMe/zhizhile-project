@@ -1,45 +1,45 @@
 package com.zzl.zhizhile.configstate.mapper;
 
 import com.zzl.zhizhile.configstate.model.entity.PatternConfigEntity;
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.stereotype.Component;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 阅读配置 DAO，按项目与图解维度存取阅读配置。
  */
-@Component
-public class PatternConfigMapper {
-    private final AtomicLong idGen = new AtomicLong(1);
-    private final Map<String, PatternConfigEntity> store = new ConcurrentHashMap<>();
+@Mapper
+public interface PatternConfigMapper {
 
     /**
      * 保存或覆盖阅读配置。
      */
-    public PatternConfigEntity upsert(PatternConfigEntity entity) {
-        String key = key(entity.getProjectId(), entity.getPatternId());
-        PatternConfigEntity existing = store.get(key);
-        if (existing == null) {
-            entity.setId(idGen.getAndIncrement());
-        } else {
-            entity.setId(existing.getId());
-        }
-        entity.setUpdateTime(LocalDateTime.now());
-        store.put(key, entity);
-        return entity;
-    }
+    @Insert("""
+            INSERT INTO pattern_configs (project_id, pattern_id, current_page, mask_top_offset, mask_height, update_time)
+            VALUES (#{projectId}, #{patternId}, #{currentPage}, #{maskTopOffset}, #{maskHeight}, NOW())
+            ON DUPLICATE KEY UPDATE
+              id = LAST_INSERT_ID(id),
+              current_page = VALUES(current_page),
+              mask_top_offset = VALUES(mask_top_offset),
+              mask_height = VALUES(mask_height),
+              update_time = NOW()
+            """)
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    int upsert(PatternConfigEntity entity);
 
     /**
      * 查询指定项目和图解的阅读配置。
      */
-    public Optional<PatternConfigEntity> findByProjectIdAndPatternId(Long projectId, Long patternId) {
-        return Optional.ofNullable(store.get(key(projectId, patternId)));
-    }
+    @Select("""
+            SELECT id, project_id, pattern_id, current_page, mask_top_offset, mask_height, update_time
+            FROM pattern_configs
+            WHERE project_id = #{projectId} AND pattern_id = #{patternId}
+            """)
+    PatternConfigEntity selectByProjectIdAndPatternId(Long projectId, Long patternId);
 
-    private String key(Long projectId, Long patternId) {
-        return projectId + "_" + patternId;
+    default Optional<PatternConfigEntity> findByProjectIdAndPatternId(Long projectId, Long patternId) {
+        return Optional.ofNullable(selectByProjectIdAndPatternId(projectId, patternId));
     }
 }
