@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: zhizhile-backend
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+server:
+  port: 8080
+
+zhizhile:
+  upload:
+    dir: ${java.io.tmpdir}/zhizhile/uploads
+    allowed-exts: pdf,jpg,jpeg,png
+  user:
+    test-user-id: 10001
