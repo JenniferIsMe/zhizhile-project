@@ -1,189 +1,217 @@
-# 织织乐前端开发任务拆解（按页面/组件维度）
+# 织织乐前端开发任务拆解（MVP）
 
 ## 1. 文档目标
-基于以下输入产出前端开发任务拆解，用于 `zhizhile-frontend` 落地实施：
+基于以下输入文档与原型，沉淀可执行的前端开发任务拆解（按页面/组件维度）：
 - `prds/pic-upload-prd.md`
-- `yuanxin_pics/工作台.png`
-- `yuanxin_pics/设置.png`
-- `yuanxin_pics/图解库.png`
 - `zhizhile-backend/specs/spec.md`
 - `zhizhile-backend/specs/plan.md`
+- `yuanxin_pics/图解库.png`
+- `yuanxin_pics/工作台.png`
+- `yuanxin_pics/设置.png`
 
-## 2. 页面范围（MVP）
-- 图解库页（Pattern Library）
-- 工作台页（Workbench）
-- 设置页（Settings）
-- 全局骨架（侧边栏、顶部栏、状态提示、弹窗）
-- 数据统计页（导航保留，MVP 可占位）
+## 2. 范围定义
 
-## 3. 全局公共模块任务
+### 2.1 本期包含
+- 图解库页（项目与图解管理）
+- 工作台页（图解阅读 + 聚焦遮罩 + 计数/计时）
+- 设置页（工作台行为参数）
+- 全局框架（侧边导航、顶部栏、状态反馈、弹层）
+- 前后端联调（项目、图解、阅读配置、进度同步）
 
-### 3.1 应用骨架与路由
-- 建立路由：`/library`、`/workbench/:projectId`、`/settings`、`/stats`
-- 实现左侧导航高亮与页面切换
-- 提供全局空态、加载态、错误态容器
+### 2.2 本期不包含
+- 统计看板页（`统计看板.png`）
 
-### 3.2 API 基础层
-- 统一封装请求客户端（超时、错误映射、响应解包）
-- 对接后端接口：
-- `POST /api/v1/projects`
-- `GET /api/v1/projects/{projectId}`
-- `GET /api/v1/projects/{projectId}/overview`
-- `POST /api/v1/projects/{projectId}/patterns/upload`
-- `POST /api/v1/projects/{projectId}/patterns/link`
-- `GET /api/v1/projects/{projectId}/patterns`
-- `PUT /api/v1/projects/{projectId}/patterns/{patternId}/current`
-- `DELETE /api/v1/projects/{projectId}/patterns/{patternId}`
-- `GET /api/v1/files/{fileId}/content`
-- `GET /api/v1/projects/{projectId}/pattern-config`
-- `PUT /api/v1/projects/{projectId}/pattern-config`
-- `PUT /api/v1/projects/{projectId}/progress/row`
-- `PUT /api/v1/projects/{projectId}/progress/time`
-- `GET /api/v1/projects/{projectId}/progress`
+## 3. 页面级任务拆解
 
-### 3.3 全局状态管理
-- 拆分状态域：项目、图解列表、当前图解、阅读配置、计数计时、设置项
-- 页面刷新恢复：优先调用 `overview` 一次性恢复
-- 实现“最后写入生效”的前端协作策略（本地覆盖显示 + 服务端返回校正）
+## 3.1 图解库页（`/library`）
 
-### 3.4 防抖与快捷键中枢
-- 阅读配置保存防抖：1000ms
-- 计数同步防抖：1500ms
-- 计时同步轮询：每 3000ms
-- 快捷键：`ArrowUp`、`ArrowDown`、`Space`
-- 输入框聚焦时快捷键自动禁用
-
-### 3.5 通用反馈组件
-- Toast（成功/失败）
-- Confirm Dialog（删除图解）
-- Upload Panel（上传/链接输入）
-- Empty State（无项目、无图解、无当前图解）
-
-## 4. 页面任务拆解
-
-## 4.1 图解库页（/library）
 ### 页面目标
-- 管理项目与项目内图解资源
-- 支持新增项目、上传图解、添加链接、切换当前图解、删除图解
+- 以“项目”为单位管理图解资源
+- 支持上传图解、添加图解链接、切换当前图解、删除图解
+- 从图解库进入工作台
 
-### 组件与任务
-- `ProjectHeader`
-- 搜索框（前端过滤）
-- 新建项目按钮（调用 `POST /projects`）
-- `ProjectCardGrid`
-- 项目卡片渲染（封面、名称、格式标签、更新时间）
-- 进入工作台按钮（跳转 `/workbench/:projectId`）
-- `PatternManageDrawer/Modal`
-- 上传图解文件（`POST /patterns/upload`）
-- 添加图解链接（`POST /patterns/link`，前端 URL 格式校验）
-- 图解列表展示（`GET /patterns`）
-- 设为当前图解（`PUT /patterns/{patternId}/current`）
-- 删除图解（`DELETE /patterns/{patternId}` + 二次确认）
-- `ProjectQuickStatus`
-- 展示当前行数、当前图解、同步状态（可来自 `overview/progress`）
+### 页面模块
+- 顶部搜索与筛选区
+- 项目卡片列表区
+- 新建项目入口
+- 图解管理弹层/抽屉
 
-### 验收点
-- 能完成项目创建与图解新增两种来源
-- 能手动切换当前图解
-- 删除当前图解后可正确显示后端返回的新当前图解
+### 页面任务
+- 接入项目创建：`POST /api/v1/projects`
+- 接入项目列表（可由后端详情/概览组合实现）
+- 接入上传图解：`POST /api/v1/projects/{projectId}/patterns/upload`
+- 接入添加链接：`POST /api/v1/projects/{projectId}/patterns/link`
+- 接入图解列表：`GET /api/v1/projects/{projectId}/patterns`
+- 接入切换当前图解：`PUT /api/v1/projects/{projectId}/patterns/{patternId}/current`
+- 接入删除图解：`DELETE /api/v1/projects/{projectId}/patterns/{patternId}`
+- 删除当前图解后，按后端返回刷新当前图解状态
+- 点击项目卡片进入工作台：`/workbench/:projectId`
 
-## 4.2 工作台页（/workbench/:projectId）
+### 验收标准
+- 可创建项目且项目名必填
+- 支持上传图解与链接图解两种来源
+- 同项目可管理多图解并可手动切换当前图解
+- 删除当前图解后 UI 正确反映后端自动切换结果
+
+## 3.2 工作台页（`/workbench/:projectId`）
+
 ### 页面目标
-- 左侧阅读器 + 右侧计数/计时控制台
-- 支持聚焦遮罩、计数、计时与自动同步
+- 左侧图解阅读器 + 右侧计数计时控制台
+- 支持阅读状态、计数与计时的保存恢复
 
-### 组件与任务
-- `PatternViewport`
-- 渲染 PDF/图片（文件流地址来自 `GET /files/{fileId}/content`）
-- 支持缩放、滚动、翻页（至少保留页码状态）
-- `FocusMaskOverlay`
-- 蒙层透明孔效果
-- `ArrowUp/ArrowDown` 调整 `maskTopOffset`
-- 视窗高度可调（拖拽或滑杆）
-- 蒙层 `pointer-events: none`
-- `CounterPanel`
-- 当前行/圈显示
-- 大热区点击 + `Space` 触发 `totalCount +1`
-- `currentRowIndex` 调整能力（加减或输入）
-- `TimerPanel`
-- 手动模式：点击开始/暂停
-- 动作唤醒模式：首次计数自动开始
-- 累计时长显示 `HH:mm:ss`
-- `WorkbenchSideInfo`
-- 当前项目信息、当前图解信息、保存状态提示
-- 手动“保存当前进度”触发一次全量同步（可选）
+### 页面模块
+- 图解阅读区（PDF/图片）
+- 聚焦遮罩层
+- 当前行数/计数器
+- 计时器
+- 项目与图解信息侧栏
+- 保存状态提示
 
-### 数据与同步任务
-- 首屏恢复：`GET /projects/{projectId}/overview`
-- 阅读配置保存：`PUT /pattern-config`（防抖 1000ms）
-- 计数保存：`PUT /progress/row`（防抖 1500ms）
-- 计时保存：`PUT /progress/time`（每 3000ms）
-- 离开页面前触发一次 `flush` 同步
+### 页面任务
+- 首屏恢复：`GET /api/v1/projects/{projectId}/overview`
+- 兜底读取阅读配置：`GET /api/v1/projects/{projectId}/pattern-config`
+- 渲染当前图解（文件源通过 `GET /api/v1/files/{fileId}/content`）
+- 支持 PDF/图片缩放与滚动阅读
+- 实现蒙层 + 镂空聚焦窗（`pointer-events: none`）
+- 快捷键 `ArrowUp/ArrowDown` 调整 `maskTopOffset`
+- 支持调节聚焦窗高度 `maskHeight`
+- 保存阅读配置：`PUT /api/v1/projects/{projectId}/pattern-config`
+- 空格键与大热区触发计数 +1（拦截默认滚动）
+- 保存计数进度：`PUT /api/v1/projects/{projectId}/progress/row`
+- 支持计时器手动模式与动作唤醒模式
+- 保存计时进度：`PUT /api/v1/projects/{projectId}/progress/time`
+- 离开页面前执行一次进度 flush
 
-### 验收点
+### 同步策略
+- 阅读配置：停止操作后 1000ms 防抖提交
+- 计数：停止点击后 1500ms 防抖提交
+- 计时：运行中每 3000ms 周期同步
+- 快捷键隔离：输入控件聚焦时禁用 `Space/ArrowUp/ArrowDown`
+
+### 验收标准
+- 可正常加载并阅读当前图解（PDF/图片）
+- 聚焦遮罩可键盘移动且可调高度
 - 空格计数不触发页面滚动
-- 动作唤醒模式下首次计数自动启动计时
-- 连续操作无接口轰炸（符合防抖/轮询要求）
-- 刷新后恢复页码、遮罩、计数、计时、当前图解
+- 动作唤醒模式下首次计数可自动启动计时
+- 连续操作无高频接口轰炸（防抖生效）
+- 刷新后恢复当前图解、页码/遮罩、计数、计时
 
-## 4.3 设置页（/settings）
+## 3.3 设置页（`/settings`）
+
 ### 页面目标
-- 配置工作台行为偏好与聚焦参数
-- 提供同步状态感知
+- 管理工作台交互偏好
+- 提供聚焦阅读参数与同步控制
 
-### 组件与任务
-- `WorkbenchSettingsCard`
-- 动作唤醒模式开关
-- 音效开关
-- 云同步状态展示与“立即同步”
-- `FocusSettingsCard`
-- 步进大小配置（影响 `ArrowUp/ArrowDown` 单次位移）
-- 遮罩透明度配置（影响 UI 展示）
-- `PreviewCard`
-- 遮罩效果实时预览
+### 页面模块
+- 工作台控制卡
+- 聚焦视窗参数卡
+- 实时预览卡
 
-### 验收点
-- 设置变更可立即反映到工作台行为
-- 设置在刷新后保持（本地存储或配置接口，MVP 可先本地）
+### 页面任务
+- 动作唤醒模式开关（影响工作台计时启动机制）
+- 音效开关（影响计数反馈音）
+- 步进大小配置（影响 `ArrowUp/ArrowDown` 位移）
+- 遮罩透明度配置（影响聚焦层显示）
+- 云同步状态展示与“立即同步”入口
+- 设置持久化（MVP 可本地存储）并在工作台即时生效
 
-## 4.4 数据统计页（/stats）
-### 页面目标
-- MVP 阶段提供占位与基础结构，避免导航死链
+### 验收标准
+- 设置变更可即时影响工作台行为
+- 刷新后设置可恢复
 
-### 组件与任务
-- `StatsPlaceholder`
-- 显示“功能建设中”
-- 预留后续图表容器结构
+## 4. 组件级任务拆解
 
-## 5. 关键技术任务（跨页面）
+## 4.1 全局组件
+- `AppShell`：左侧导航 + 顶部栏 + 主内容容器
+- `SideNav`：图解库/工作台/设置导航高亮与跳转
+- `TopBar`：搜索入口、状态图标、用户占位
+- `GlobalToast`：成功/失败反馈
+- `ConfirmDialog`：删除图解二次确认
+- `EmptyState`：无项目/无图解/无当前图解场景
+- `ErrorState`：资源失效、接口异常场景
 
-## 5.1 键盘事件隔离
-- 输入控件聚焦时禁用 `Space/ArrowUp/ArrowDown`
-- 非编辑区恢复快捷键监听
+## 4.2 图解库页组件
+- `ProjectSearchBar`：关键字过滤（前端过滤）
+- `CreateProjectButton` + `CreateProjectModal`：新建项目
+- `ProjectCardGrid`：项目列表容器
+- `ProjectCard`：项目封面、标题、更新时间、入口按钮
+- `PatternManagerDrawer`：图解上传、链接添加、图解列表管理
+- `UploadPatternPanel`：文件上传表单与结果反馈
+- `LinkPatternPanel`：链接校验与提交
+- `PatternList`：当前图解标识、切换、删除
 
-## 5.2 音效系统
-- 计数成功播放短音效
-- 处理浏览器自动播放限制（首次用户交互后启用）
+## 4.3 工作台页组件
+- `WorkbenchLayout`：左读区右控区布局
+- `PatternReaderContainer`：阅读器状态协调
+- `PatternViewport`：PDF/图片渲染、缩放、翻页
+- `FocusMaskOverlay`：半透明蒙层与镂空视窗
+- `MaskHeightControl`：视窗高度调节
+- `ReaderHotkeyController`：键盘事件绑定与隔离
+- `CounterCard`：当前行数/累计计数/大热区点击
+- `TimerCard`：计时显示、开始/暂停、模式状态
+- `ProgressSaveIndicator`：保存中/已保存/失败提示
+- `PatternMetaCard`：当前项目与图解信息展示
 
-## 5.3 错误处理映射
-- 项目不存在、图解不存在、文件不存在、重复上传、非法链接等错误码映射为可读文案
-- 文件失效时在工作台给出可操作提示（切换图解/重新上传）
+## 4.4 设置页组件
+- `WorkbenchControlCard`：动作唤醒、音效、同步入口
+- `FocusWindowSettingsCard`：步进大小、透明度
+- `SettingsPreviewCard`：阅读效果预览
 
-## 5.4 响应式适配
-- 桌面优先（与设计图一致）
-- 窄屏下右侧面板折叠为抽屉或底部面板
+## 5. 状态管理与数据模型任务
 
-## 6. 交付顺序建议
+### 5.1 全局状态域
+- `projectState`：当前项目、项目基础信息
+- `patternState`：图解列表、当前图解、图解来源
+- `readerState`：页码、缩放、遮罩偏移、遮罩高度
+- `progressState`：当前行数、累计计数、累计时长
+- `settingsState`：动作唤醒、音效、步进、透明度
 
-### 里程碑 1：基础打通
-- 全局骨架、路由、API 层、项目创建、图解上传/链接、图解列表
+### 5.2 关键字段约定
+- `currentPatternId`
+- `currentPage`
+- `maskTopOffset`
+- `maskHeight`
+- `currentRowIndex`
+- `totalCount`
+- `totalSeconds`
 
-### 里程碑 2：工作台核心
-- 阅读器、聚焦遮罩、计数器、计时器、快捷键、防抖同步
+## 6. 接口联调任务
 
-### 里程碑 3：设置与稳定性
-- 设置页联动、错误处理完善、离开页 flush、空态与异常态补齐
+### 6.1 项目与图解
+- 创建项目、查询项目详情/概览
+- 上传图解、添加链接、查询图解列表
+- 切换当前图解、删除图解
 
-### 里程碑 4：验收回归
-- 按 PRD 验收清单逐条回归
-- 性能与网络调用频率验证
+### 6.2 阅读配置
+- 查询配置：`GET /projects/{projectId}/pattern-config`
+- 保存配置：`PUT /projects/{projectId}/pattern-config`
+
+### 6.3 进度同步
+- 保存计数：`PUT /projects/{projectId}/progress/row`
+- 保存计时：`PUT /projects/{projectId}/progress/time`
+- 查询进度：`GET /projects/{projectId}/progress`
+
+### 6.4 文件访问
+- 文件流读取：`GET /files/{fileId}/content`
+
+## 7. 异常与边界任务
+- 项目不存在：提示并返回图解库
+- 图解不存在：提示并引导重新选择
+- 文件不存在/损坏：提示“文件失效”
+- 重复上传：显示后端明确提示
+- 链接不合法：前置校验 + 后端错误透传
+- 外链不可打开：展示可操作错误提示，不静默失败
+
+## 8. 开发排期建议（不含统计看板）
+
+### 里程碑 1：基础框架与图解库打通
+- AppShell + 路由 + 项目/图解管理接口 + 图解库页核心流程
+
+### 里程碑 2：工作台核心阅读与同步
+- 阅读器渲染 + 聚焦遮罩 + 快捷键 + 防抖同步 + 刷新恢复
+
+### 里程碑 3：计数计时与设置联动
+- 计数/计时完整流程 + 设置页参数生效 + 反馈与异常完善
+
+### 里程碑 4：联调与验收
+- 按 PRD 验收清单逐项回归（尤其防抖与恢复）
