@@ -5,6 +5,7 @@ import TopBar from './components/common/TopBar.vue'
 import GlobalToast from './components/common/GlobalToast.vue'
 import LibraryView from './views/LibraryView.vue'
 import WorkbenchView from './views/WorkbenchView.vue'
+import StatsView from './views/StatsView.vue'
 import SettingsView from './views/SettingsView.vue'
 import { useRouterState } from './router'
 
@@ -23,6 +24,10 @@ const activeView = computed(() => {
 
   if (router.routeName.value === 'settings') {
     return SettingsView
+  }
+
+  if (router.routeName.value === 'stats') {
+    return StatsView
   }
 
   return LibraryView

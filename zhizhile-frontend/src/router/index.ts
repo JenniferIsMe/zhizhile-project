@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
  * 路由名称集合。
  * 为了避免字符串散落在各个组件中，统一在这里集中声明。
  */
-export type RouteName = 'library' | 'workbench' | 'settings'
+export type RouteName = 'library' | 'workbench' | 'stats' | 'settings'
 
 /**
  * 路由定义。
@@ -20,6 +20,7 @@ interface RouteRecord {
 const routeTable: RouteRecord[] = [
   { name: 'library', path: '/library' },
   { name: 'workbench', path: '/workbench/:projectId' },
+  { name: 'stats', path: '/stats' },
   { name: 'settings', path: '/settings' },
 ]
 

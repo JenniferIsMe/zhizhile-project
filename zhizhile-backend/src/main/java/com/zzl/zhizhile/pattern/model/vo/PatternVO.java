@@ -1,5 +1,7 @@
 package com.zzl.zhizhile.pattern.model.vo;
 
+
+@Entity
 public class PatternVO {
     private Long id;
     private Long projectId;

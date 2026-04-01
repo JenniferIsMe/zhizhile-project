@@ -11,7 +11,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   manage: [project: ProjectDetail]
-  open: [project: ProjectDetail]
 }>()
 </script>
 
@@ -27,7 +26,6 @@ const emit = defineEmits<{
       <div class="meta">项目 ID：{{ project.id }}</div>
       <div class="actions">
         <button class="btn" @click="emit('manage', project)">管理图解</button>
-        <button class="btn primary" @click="emit('open', project)">进入工作台</button>
       </div>
     </article>
   </div>

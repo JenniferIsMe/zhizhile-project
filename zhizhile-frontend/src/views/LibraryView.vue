@@ -14,7 +14,6 @@ import {
   switchCurrentPattern,
   uploadPattern,
 } from '../api/pattern'
-import { navigate } from '../router'
 import { getRecentProjectIds, projectState, saveRecentProjectId } from '../stores/project'
 import { pushToast } from '../stores/toast'
 import type { Pattern, ProjectDetail } from '../types/api'
@@ -96,6 +95,8 @@ async function handleCreateProject(name: string): Promise<void> {
  */
 async function openPatternManager(project: ProjectDetail): Promise<void> {
   activeProjectId.value = project.id
+  projectState.currentProject = project
+  saveRecentProjectId(project.id)
   showPatternDrawer.value = true
   await refreshPatterns(project.id)
 }
@@ -213,14 +214,6 @@ async function confirmDeletePattern(): Promise<void> {
   }
 }
 
-/**
- * 进入工作台。
- */
-function enterWorkbench(project: ProjectDetail): void {
-  saveRecentProjectId(project.id)
-  navigate(`/workbench/${project.id}`)
-}
-
 onMounted(() => {
   void bootstrapProjects()
 })
@@ -254,7 +247,6 @@ onMounted(() => {
       :projects="projectState.projects"
       :active-project-id="activeProjectId"
       @manage="openPatternManager"
-      @open="enterWorkbench"
     />
 
     <CreateProjectModal

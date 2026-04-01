@@ -9,7 +9,7 @@ import org.springframework.web.filter.CorsFilter;
 
 /**
  * 全局 CORS 配置。
- * 仅放行 /api/** 路径，并通过白名单控制可访问来源。
+ * 仅放行 /api/** 路径，允许所有来源访问。
  */
 @Configuration
 public class WebCorsConfig {
@@ -17,9 +17,7 @@ public class WebCorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173"
-        ));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
