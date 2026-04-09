@@ -16,7 +16,7 @@ import {
 } from '../api/pattern'
 import { getRecentProjectIds, projectState, saveRecentProjectId } from '../stores/project'
 import { pushToast } from '../stores/toast'
-import type { Pattern, ProjectDetail } from '../types/api'
+import type { Pattern, PatternSourceInput, ProjectDetail } from '../types/api'
 
 /**
  * 页面局部状态。
@@ -72,17 +72,33 @@ async function bootstrapProjects(): Promise<void> {
 }
 
 /**
- * 创建项目。
+ * 创建项目并立即添加图解。
+ * 项目创建失败时保持弹窗并设错；图解添加失败时仍关闭弹窗。
  */
-async function handleCreateProject(name: string): Promise<void> {
+async function handleCreateProject(
+  name: string,
+  type: number,
+  patternSource: PatternSourceInput,
+): Promise<void> {
   loadingCreate.value = true
 
   try {
-    const created = await createProject(name)
+    const created = await createProject(name, type)
     projectState.projects = [created, ...projectState.projects.filter((item) => item.id !== created.id)]
     saveRecentProjectId(created.id)
+
+    try {
+      if (patternSource.kind === 'upload') {
+        await uploadPattern(created.id, patternSource.file)
+      } else {
+        await createPatternLink(created.id, patternSource.url, patternSource.displayName)
+      }
+      pushToast('success', '项目创建成功')
+    } catch (patternError) {
+      pushToast('error', `项目已创建，但图解添加失败：${(patternError as Error).message}`)
+    }
+
     showCreateModal.value = false
-    pushToast('success', '项目创建成功')
   } catch (error) {
     pushToast('error', `创建项目失败：${(error as Error).message}`)
   } finally {

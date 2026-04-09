@@ -3,11 +3,12 @@ import type { ProjectDetail, ProjectOverview } from '../types/api'
 
 /**
  * 创建项目。
+ * type: 0=钩针 1=棒针
  */
-export function createProject(name: string): Promise<ProjectDetail> {
+export function createProject(name: string, type: number): Promise<ProjectDetail> {
   return request<ProjectDetail>('/projects', {
     method: 'POST',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, type }),
   })
 }
 

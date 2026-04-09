@@ -18,8 +18,8 @@ public interface ProjectMapper {
      * 新增项目记录。
      */
     @Insert("""
-            INSERT INTO projects (user_id, name, status, current_pattern_id, create_time, update_time)
-            VALUES (#{userId}, #{name}, #{status}, #{currentPatternId}, NOW(), NOW())
+            INSERT INTO projects (user_id, name, type, status, current_pattern_id, create_time, update_time)
+            VALUES (#{userId}, #{name}, #{type}, #{status}, #{currentPatternId}, NOW(), NOW())
             """)
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insert(ProjectEntity entity);
@@ -28,7 +28,7 @@ public interface ProjectMapper {
      * 按项目 ID 查询项目。
      */
     @Select("""
-            SELECT id, user_id, name, status, current_pattern_id, create_time, update_time
+            SELECT id, user_id, name, type, status, current_pattern_id, create_time, update_time
             FROM projects
             WHERE id = #{id}
             """)
@@ -45,6 +45,7 @@ public interface ProjectMapper {
             UPDATE projects
             SET user_id = #{userId},
                 name = #{name},
+                type = #{type},
                 status = #{status},
                 current_pattern_id = #{currentPatternId},
                 update_time = NOW()

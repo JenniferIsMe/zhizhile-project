@@ -15,8 +15,17 @@ export interface ApiResponse<T> {
 export interface ProjectDetail {
   id: number
   name: string
+  /** 项目类型：0=钩针 1=棒针 */
+  type: number | null
   currentPatternId: number | null
 }
+
+/**
+ * 新建项目时图解来源，二选一。
+ */
+export type PatternSourceInput =
+  | { kind: 'upload'; file: File }
+  | { kind: 'link'; url: string; displayName: string }
 
 /**
  * 图解来源类型。

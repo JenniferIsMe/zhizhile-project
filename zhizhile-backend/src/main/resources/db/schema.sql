@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS projects (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   name VARCHAR(128) NOT NULL,
+  type INT NULL,
   status VARCHAR(32) NOT NULL,
   current_pattern_id BIGINT NULL,
   create_time DATETIME NOT NULL,

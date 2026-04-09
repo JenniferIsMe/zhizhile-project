@@ -50,6 +50,7 @@ public class ProjectService {
         ProjectEntity entity = new ProjectEntity();
         entity.setUserId(testUserId);
         entity.setName(request.getName().trim());
+        entity.setType(request.getType());
         entity.setStatus("ACTIVE");
         projectMapper.insert(entity);
         return toDetail(entity);
@@ -110,6 +111,7 @@ public class ProjectService {
         ProjectDetailVO vo = new ProjectDetailVO();
         vo.setId(entity.getId());
         vo.setName(entity.getName());
+        vo.setType(entity.getType());
         vo.setCurrentPatternId(entity.getCurrentPatternId());
         return vo;
     }
